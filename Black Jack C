@@ -1,1 +1,187 @@
+//Brennen and Evan
+//C BlackJack game
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+// Needed a clock and <time.h> to create time inbetween turns
+void waitSeconds(int seconds) {
+    clock_t start = clock();
+    while ((double)(clock() - start) / CLOCKS_PER_SEC < seconds);
+}
+
+// struct for the card
+typedef struct {
+    int rank;
+    int suit;
+} Card;
+
+// Determines the rank and suit of a card,
+// the same cards can be drawn though since its is just a random rank and suit each time
+Card drawCard() {
+    Card c;
+    c.rank = rand() % 13+1; //+1 since it starts at 0 and there isn't a card with a value of 0
+    c.suit = rand() % 4;
+    return c;
+}
+//gives the correct values to aces and face cards
+int cardValue(Card c) {
+    if (c.rank > 10) return 10;
+    if (c.rank == 1) return 11; //fix
+    return c.rank;
+}
+
+void printCard(Card c) {
+    const char *ranks[] = {
+        "", "Ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King"
+    };
+
+    const char *suits[] = {
+        "Hearts", "Diamonds", "Clubs", "Spades"
+    };
+
+    printf("%s of %s", ranks[c.rank], suits[c.suit]); // shows what random card was drawn
+}
+
+// this is turns aces into 1 when the ace would put the player over 21
+int adjustForAce(int total, int aces) {
+    while (total > 21 && aces > 0) {
+        total -= 10;
+        aces--;
+    }
+    return total;
+}
+
+// Start of Main
+int main() {
+    srand(time(NULL)); //makes random cards drawn not the every run.
+
+    long balance = 100; // intial players cash, could be long long
+    char playAgain = 'y'; //anything other than y counts as no
+
+    printf(" ! BLACKJACK ! \n");
+
+    while (balance > 0 && playAgain == 'y') { //keeps playing unless player is broke
+        double betInput; // checks for decimals
+        long bet;
+
+        int playerTotal = 0, dealerTotal = 0; //starting totals
+        int playerAces = 0, dealerAces = 0; //starting aces
+        int playerBusted = 0; //wheather the play busted or not
+
+        printf("\nYour balance: $%ld", balance);
+        printf("\nEnter your bet: "); //game starts by asking for bet
+
+        //Makes letters invalid when inputing a bet
+        if (scanf("%lf", &betInput) != 1) {
+            while (getchar() != '\n');
+            printf("Invalid bet.\n");
+            continue;
+        }
+        while (getchar() != '\n'); //keep past inputs from messing with new ones
+
+        bet = (long)betInput;
+        if (betInput < 1 || betInput != bet || bet > balance) { //prevents decimal and bets lower than 1
+            printf("Invalid bet.\n");
+            continue;
+        }
+
+        // First deal
+        int i;
+        for (i=0; i < 2; i++) { //deals 2 cards
+            Card c = drawCard(); //player's 2
+            playerTotal += cardValue(c);
+            if (c.rank == 1) playerAces++;
+
+            c = drawCard();  //dealer's 2
+            dealerTotal += cardValue(c);
+            if (c.rank == 1) dealerAces++;
+        }
+
+        playerTotal = adjustForAce(playerTotal, playerAces);
+        dealerTotal = adjustForAce(dealerTotal, dealerAces);
+
+        // waits 2 seconds before dealing cards
+        printf("\nDealing cards...");
+        fflush(stdout); //so Dealing cards... is shown before the 2 sec wait
+        waitSeconds(2);
+
+        // Player's hit or stand input
+        char choice; // allowing input for hit or stand
+        while (1) {
+            printf("\n\nYour hand: %d", playerTotal);
+            printf("\nHit (h) or Stand (s)? ");
+
+            scanf(" %c", &choice);
+
+            if (choice == 'h') { //hit
+                Card c = drawCard();
+                printf("\nYou drew: ");
+                printCard(c);
+                printf("\n");
+
+                playerTotal += cardValue(c);
+                if (c.rank == 1) playerAces++;
+
+                playerTotal = adjustForAce(playerTotal, playerAces);
+
+                //went over 21
+                if (playerTotal > 21) {
+                    printf("\nYour hand: %d", playerTotal);
+                    printf("\nYou busted. Dealer wins.\n");
+                    balance -= bet;
+                    playerBusted = 1;
+                    break;
+                }
+
+            } else if (choice == 's') { //stand
+                printf("\nDealer is playing...");
+                fflush(stdout);// so Dealer is playing... shown before 2 seconds
+                waitSeconds(2);
+                break;
+            }
+        } //prompt repeats if not h or s isn't typed
+
+        // For the Dealer
+        if (!playerBusted) { //draws cards it player didn't bust
+            while (dealerTotal < 17) { //dealer draws if his total is under 17
+                Card c = drawCard();
+                dealerTotal += cardValue(c);
+                if (c.rank == 1) dealerAces++;
+
+                dealerTotal = adjustForAce(dealerTotal, dealerAces);
+            }
+
+            printf("\nDealer's hand: %d\n", dealerTotal);
+
+            if (dealerTotal > 21 || playerTotal > dealerTotal) { //player's total vs Dealers total
+                printf("You win!\n");
+                balance += bet;
+            } else if (playerTotal < dealerTotal) {
+                printf("Dealer wins.\n");
+                balance -= bet;
+            } else {
+                printf("Push (tie).\n");
+            }
+        }
+        // million dollar limit
+        if (balance >= 1000000LL) {
+            printf("\nCurrent balance: $%ld\n", balance);
+            waitSeconds(3);
+            printf("You've been kicked out of the casino.\n");
+            return 0;
+        }
+        //play again loop
+        printf("\nCurrent balance: $%ld", balance);
+        printf("\nPlay again? (y/n): ");
+        scanf(" %c", &playAgain); //anything other than Y, ends game
+    }
+    //game over
+    if (balance <= 0) {
+        printf("\nYou're broke, Game over.\n");
+    }
+
+    printf("Thanks for playing!\n"); //
+    return 0;
+}
