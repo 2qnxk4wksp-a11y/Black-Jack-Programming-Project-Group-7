@@ -8,49 +8,45 @@
 // Needed a clock and <time.h> to create time inbetween turns
 void waitSeconds(int seconds)
 {
-    clock_t start = clock();
-    while ((double)(clock() - start) / CLOCKS_PER_SEC < seconds);
+clock_t start = clock();
+while ((double)(clock() - start) / CLOCKS_PER_SEC < seconds);
 }
 
 
 
 // struct for the card
-typedef struct
-{
-    int rank;
-    int suit;
-} 
+typedef struct {int rank; int suit;} Card;
 
 
 
 
         // Determines the rank and suit of a card,
         // the same cards can be drawn though since its is just a random rank and suit each time
-Card;
+
 Card drawCard()
 {
-    Card c;
-    c.rank = rand() % 13+1;     //+1 since it starts at 0 and there isn't a card with a value of 0
-    c.suit = rand() % 4;
-    return c;
+Card c;
+c.rank = rand() % 13+1;     //+1 since it starts at 0 and there isn't a card with a value of 0
+c.suit = rand() % 4;
+return c;
 }
 
  //This ccorrects the values to aces and face cards
 int cardValue(Card c)
 {
-    if (c.rank > 10) return 10;
-    if (c.rank == 1) return 11; //fix
-    return c.rank;
+if (c.rank > 10) return 10;
+if (c.rank == 1) return 11; //fix
+return c.rank;
 }
 
 
 
 void printCard(Card c)
 {
-    const char *ranks[]={"", "Ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King"};
-    const char *suits[] ={"Hearts", "Diamonds", "Clubs", "Spades" };
+const char *ranks[]={"", "Ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King"};
+const char *suits[] ={"Hearts", "Diamonds", "Clubs", "Spades" };
 
-    printf("%s of %s", ranks[c.rank],suits[c.suit]);         // shows what random card was drawn
+printf("%s of %s", ranks[c.rank],suits[c.suit]);         // shows what random card was drawn
 }
 
 
@@ -59,11 +55,13 @@ void printCard(Card c)
 int adjustForAce(int total, int aces)
 {
     while (total > 21 && aces > 0)
+
 {
-        total -=10;
-        aces--;
-    }
-    return total;
+total -=10;
+aces--;
+}
+
+return total;
 }
 
 
@@ -76,7 +74,7 @@ srand(time(NULL));         //makes random cards drawn not the every run.
 
 
 long balance = 100;         // intial players cash, could be long long                                                Starting Cash
-char playAgain = "y";         //anything other than y counts as no
+char playAgain = 'y';         //anything other than y counts as no
 
 
 printf(" ! BLACKJACK !\n");
@@ -84,7 +82,7 @@ printf(" ! BLACKJACK !\n");
 
 
 
-while (balance>0 && playAgain=="y")        //keeps playing unless player is broke
+while (balance>0 && playAgain=='y')        //keeps playing unless player is broke
 
 
 { //-------
@@ -110,11 +108,11 @@ printf("\nEnter your bet: ");
         
 if (scanf("%lf", &betInput) != 1)        //Makes letters invalid when inputing a bet
 {
-while (getchar() != "\n");
+while (getchar() != '\n');        //keep past inputs from messing with new ones
 printf("Invalid bet.\n");
 continue;
 }
-while (getchar() != "\n");             //keep past inputs from messing with new ones
+while (getchar() != '\n');        //keep past inputs from messing with new ones
 bet = (long)betInput;
 if (betInput < 1 || betInput != bet || bet > balance)         //prevents decimal and bets lower than 1
 
@@ -165,7 +163,7 @@ scanf(" %c", &choice);
 
 
 
-if (choice == "h")                //hit
+if (choice == 'h')                //hit
 {
 Card c = drawCard();
 printf("\nYou drew: ");
@@ -191,7 +189,7 @@ break;
 
 } 
 
-else if (choice == "s")                 //stand
+else if (choice == 's')                 //stand
 {    
 printf("\nDealer is playing...");
 fflush(stdout);        // so Dealer is playing... shown before 2 seconds
